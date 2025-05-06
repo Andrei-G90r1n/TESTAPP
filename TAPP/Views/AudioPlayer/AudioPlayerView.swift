@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AudioPlayerView: View {
     @StateObject private var viewModel: AudioPlayerViewModel
+    @Environment(\.horizontalSizeClass) var sizeClass
 
     var body: some View {
         NavigationStack {
@@ -17,22 +18,51 @@ struct AudioPlayerView: View {
             case .success:
                 ZStack {
                     Color.slateNavy.ignoresSafeArea()
-                    VStack(spacing: 16) {
-                        ImageBlockView(url: URL(string: viewModel.episodeImageUrl))
+                    VStack(spacing: 8) {
+                        Group {
+                            if sizeClass == .compact {
+                                VStack(spacing: 12) {
+                                    ImageBlockView(url: URL(string: viewModel.episodeImageUrl))
 
-                        Text(viewModel.titleText)
-                            .font(.headline)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.white)
+                                    Text(viewModel.titleText)
+                                        .font(.headline)
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
 
-                        Text(viewModel.bodyText)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.lightGray)
+                                    Text(viewModel.bodyText)
+                                        .font(.subheadline)
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.lightGray)
 
-                        Text(viewModel.contentPublicStart.formatUnixTimestamp())
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                                    Text(viewModel.contentPublicStart.formatUnixTimestamp())
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                            } else {
+                                HStack(alignment: .top, spacing: 16) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(viewModel.titleText)
+                                            .font(.headline)
+                                            .multilineTextAlignment(.leading)
+                                            .foregroundColor(.white)
+
+                                        Text(viewModel.bodyText)
+                                            .font(.subheadline)
+                                            .multilineTextAlignment(.leading)
+                                            .foregroundColor(.lightGray)
+                                            .frame(maxHeight: .infinity, alignment: .top)
+
+                                        Text(viewModel.contentPublicStart.formatUnixTimestamp())
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+
+                                    Spacer()
+
+                                    ImageBlockView(url: URL(string: viewModel.episodeImageUrl))
+                                }
+                            }
+                        }
 
                         TimeSliderView(
                             currentTime: $viewModel.currentTime,
@@ -46,8 +76,11 @@ struct AudioPlayerView: View {
                                 viewModel.playPause()
                             }
                         )
+                        Spacer(minLength: 8)
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.bottom, 32)
                 }
 
             case .failure(let error):
